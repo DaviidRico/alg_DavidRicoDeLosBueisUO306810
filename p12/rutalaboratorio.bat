@@ -1,2 +1,2 @@
-set path=C:\Program Files\Java\<jdk>\bin
-set classpath=C:\Users\<loquesea>\<repositorio github>\p12
+set path=C:\Program Files\Java\jdk-24\bin
+set classpath=C:\Users\uo306810\Desktop\alg_DavidRicoDeLosBueisUO306810\p12
