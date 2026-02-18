@@ -2,6 +2,8 @@ package p12;
 
 public class Bucle4 {
 
+	//O(n^3)
+	//(2/3) * n^3
 	public static long bucle4(int n) {
 		long cont = 0;
 		for (int i = 1; i <= n; i++) {

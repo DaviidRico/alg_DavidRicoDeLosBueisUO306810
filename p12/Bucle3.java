@@ -1,5 +1,6 @@
 package p12;
 
+//O(log(n) * n^2)
 public class Bucle3 {
 	public static long bucle3(long n) {
 		long cont = 0;
