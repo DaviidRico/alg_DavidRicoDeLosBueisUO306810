@@ -55,11 +55,7 @@ public class PuntosDyV {
         for (int i = 0; i < n; i++) puntos[i] = new Punto(x[i], y[i]);
 
         // Ordenamos por X para poder dividir el plano por la mitad
-        Arrays.sort(puntos, new Comparator<Punto>() {
-            public int compare(Punto p1, Punto p2) {
-                return Double.compare(p1.x, p2.x);
-            }
-        });
+        Arrays.sort(puntos, Comparator.compareDouble(Stream.map (i,matriz -> matriz[i])));
 
         return algoritmoDyV(puntos, 0, n - 1);
     }
