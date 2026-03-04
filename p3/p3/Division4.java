@@ -11,8 +11,11 @@ public static void rec4 (int n)
 			cont++;
 		else
 		{ 
-			for (int i=1;i<n;i++) cont++ ;  //O(n)  
-			for (int j=1;j<n;j++) cont++ ;  //O(n)      
+			for (int i=1;i<n;i++) {
+				for (int j=1;j<n;j++) {
+					cont++ ;
+				}
+			}  
 			rec4 (n/2);
 		}
 		   
