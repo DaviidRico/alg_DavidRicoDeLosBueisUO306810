@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Comparator;
 
 public class PuntosDyV {
 
@@ -14,8 +13,8 @@ public class PuntosDyV {
     }
 
     public static void main(String[] args) {
-
         try {
+            if (args.length == 0) return;
             BufferedReader br = new BufferedReader(new FileReader(args[0]));
             String primeraLinea = br.readLine();
             if (primeraLinea == null) throw new IOException("Fichero vacío");
@@ -34,94 +33,59 @@ public class PuntosDyV {
             }
             br.close();
 
-            long t1 = System.currentTimeMillis();
             PuntosTrivial.Resultado res = resolverDyV(x, y);
-            long t2 = System.currentTimeMillis();
-
-            long tiempoTotal = t2 - t1;
 
             System.out.printf("PUNTOS MÁS CERCANOS: [%f, %f] [%f, %f]%n", res.x1, res.y1, res.x2, res.y2);
             System.out.printf("SU DISTANCIA MÍNIMA = %f%n", res.distancia);
-            System.out.println("TIEMPO DE EJECUCIÓN (DyV): " + tiempoTotal + " ms");
 
         } catch (IOException | NumberFormatException e) {
-            System.err.println("Error al procesar el fichero: " + e.getMessage());
+            System.err.println("Error: " + e.getMessage());
         }
     }
 
+    // MÉTODO NO RECURSIVO:
     public static PuntosTrivial.Resultado resolverDyV(double[] x, double[] y) {
         int n = x.length;
         Punto[] puntos = new Punto[n];
         for (int i = 0; i < n; i++) puntos[i] = new Punto(x[i], y[i]);
 
-        // Ordenamos por X para poder dividir el plano por la mitad
-        Arrays.sort(puntos, new Comparator<Punto>() {
-            public int compare(Punto p1, Punto p2) {
-                return Double.compare(p1.x, p2.x);
-            }
-        });
+        // Ordenamos para establecer la división física
+        Arrays.sort(puntos, (p1, p2) -> Double.compare(p1.x, p2.x));
 
-        return algoritmoDyV(puntos, 0, n - 1);
-    }
+        int medio = (n / 2) - 1;
 
-    private static PuntosTrivial.Resultado algoritmoDyV(Punto[] pts, int izq, int der) {
-        if (der - izq < 3) {
-            return calcularTrivial(pts, izq, der);
-        }
+        PuntosTrivial.Resultado resMitadIzq = algoritmoDyV(puntos, 0, medio);
+        PuntosTrivial.Resultado resMitadDer = algoritmoDyV(puntos, medio + 1, n - 1);
 
-        int medio = (izq + der) / 2;
-        Punto puntoMedio = pts[medio];
+        PuntosTrivial.Resultado mejor = (resMitadIzq.distancia < resMitadDer.distancia) ? resMitadIzq : resMitadDer;
 
-        // Aquí es donde el algoritmo se llama a sí mismo
-        PuntosTrivial.Resultado dIzq = algoritmoDyV(pts, izq, medio); 
-        PuntosTrivial.Resultado dDer = algoritmoDyV(pts, medio + 1, der);
-
-        // Nos quedamos con el mejor resultado de las dos mitades
-        PuntosTrivial.Resultado mejor = (dIzq.distancia < dDer.distancia) ? dIzq : dDer;
-        double delta = mejor.distancia;
-
-        // miramos punto a la izquierda 
-        // y a la derecha que estén más cerca que los encontrados arriba.
-        
-        Punto[] franja = new Punto[der - izq + 1];
-        int tam = 0;
-        for (int i = izq; i <= der; i++) {
-            if (Math.abs(pts[i].x - puntoMedio.x) < delta) {
-                franja[tam++] = pts[i];
-            }
-        }
-
-        // Solo comparamos los puntos que han entrado en la "franja" central
-        for (int i = 0; i < tam; i++) {
-            for (int j = i + 1; j < tam; j++) {
-                if (Math.abs(franja[j].y - franja[i].y) >= delta) continue;
-
-                double d = dist(franja[i], franja[j]);
-                if (d < mejor.distancia) {
-                    mejor = new PuntosTrivial.Resultado(franja[i].x, franja[i].y, franja[j].x, franja[j].y, d);
-                    delta = d;
-                }
-            }
+        // COMPARACIÓN CRÍTICA:
+        double dUnion = dist(puntos[medio], puntos[medio + 1]);
+        if (dUnion < mejor.distancia) {
+            mejor = new PuntosTrivial.Resultado(puntos[medio].x, puntos[medio].y, 
+                                               puntos[medio + 1].x, puntos[medio + 1].y, dUnion);
         }
 
         return mejor;
     }
 
-    private static double dist(Punto p1, Punto p2) {
-        return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+    // MÉTODO RECURSIVO:
+    private static PuntosTrivial.Resultado algoritmoDyV(Punto[] pts, int izq, int der) {
+        // Caso base
+        if (der - izq == 1) {
+            double d = dist(pts[izq], pts[der]);
+            return new PuntosTrivial.Resultado(pts[izq].x, pts[izq].y, pts[der].x, pts[der].y, d);
+        }
+
+        int medio = (izq + der) / 2;
+        
+        PuntosTrivial.Resultado dIzq = algoritmoDyV(pts, izq, medio);
+        PuntosTrivial.Resultado dDer = algoritmoDyV(pts, medio + 1, der);
+
+        return (dIzq.distancia < dDer.distancia) ? dIzq : dDer;
     }
 
-    private static PuntosTrivial.Resultado calcularTrivial(Punto[] pts, int izq, int der) {
-        double min = Double.MAX_VALUE;
-        Punto a = null, b = null;
-        for (int i = izq; i <= der; i++) {
-            for (int j = i + 1; j <= der; j++) {
-                double d = dist(pts[i], pts[j]);
-                if (d < min) {
-                    min = d; a = pts[i]; b = pts[j];
-                }
-            }
-        }
-        return new PuntosTrivial.Resultado(a.x, a.y, b.x, b.y, min);
+    private static double dist(Punto p1, Punto p2) {
+        return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
     }
 }
