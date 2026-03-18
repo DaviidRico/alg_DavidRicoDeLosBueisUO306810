@@ -1,26 +1,30 @@
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ColoreoGrafo {
-    
-    private List<String> colors = Arrays.asList(
-    "red", "blue", "green",
-    "yellow", "orange", "purple",
-    "cyan", "magenta", "lime");
+    private static final List<String> colors = Arrays.asList(
+        "red", "blue", "green", "yellow", "orange", "purple", "cyan", "magenta", "lime");
 
-    private final static int  MAX_CONEX = 8;
+    public static Map<String, String> realizarVoraz(Map<String, List<String>> grafo) {
+        Map<String, String> resultado = new HashMap<>();
 
-    static public Map<String, String> realizarVoraz(Map<String, List<String>> grafo) {
-        Map<String, String> result = new Map<String, String>();
+        for (String nodo : grafo.keySet()) {
+            Set<String> coloresProhibidos = new HashSet<>();
+            
+            // Al estar normalizado, los vecinos ya son Strings
+            for (String vecino : grafo.get(nodo)) {
+                if (resultado.containsKey(vecino)) {
+                    coloresProhibidos.add(resultado.get(vecino));
+                }
+            }
 
-        for(String elemnto: grafo.keySet()){
-
+            // Asignar el primer color disponible
+            for (String color : colors) {
+                if (!coloresProhibidos.contains(color)) {
+                    resultado.put(nodo, color);
+                    break;
+                }
+            }
         }
-        
+        return resultado;
     }
-
-    //recorro jason luego miro los vecinos dentro de result
-    //map contains key(3)
-    //metodo para recorrer el jason con un for
 }

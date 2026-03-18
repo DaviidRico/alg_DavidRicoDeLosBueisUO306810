@@ -12,9 +12,8 @@ public class Devorador {
 		JSONParser parser = new JSONParser();
 		try (FileReader reader = new FileReader("grafo.json")) {
 			JSONObject jsonObject = (JSONObject) parser.parse(reader);
-			@SuppressWarnings("unchecked")
-			Map<String, List<String>> grafo = (Map<String, List<String>>) jsonObject.get("grafo");
-
+			Map<?, ?> rawGrafo = (Map<?, ?>) jsonObject.get("grafo");
+			Map<String, List<String>> grafo = normalizarGrafo(rawGrafo);
 			Map<String, String> solucion = ColoreoGrafo.realizarVoraz(grafo);
 			try (FileWriter file = new FileWriter("solucion.json")) {
 				file.write(new JSONObject(solucion).toJSONString());
@@ -29,4 +28,25 @@ public class Devorador {
 			e.printStackTrace();
 		}
 	}
+
+	/*
+	 * Normaliza el grafo leído del archivo JSON.
+	 */
+	static Map<String, List<String>> normalizarGrafo(Map<?, ?> rawGrafo) {
+        Map<String, List<String>> limpio = new HashMap<>();
+        
+        for (Object key : rawGrafo.keySet()) {
+            String nodoStr = String.valueOf(key);
+            List<?> vecinosRaw = (List<?>) rawGrafo.get(key);
+            List<String> vecinosStr = new ArrayList<>();
+            
+            if (vecinosRaw != null) {
+                for (Object v : vecinosRaw) {
+                    vecinosStr.add(String.valueOf(v));
+                }
+            }
+            limpio.put(nodoStr, vecinosStr);
+        }
+        return limpio;
+    }
 }

@@ -5,6 +5,36 @@ import networkx as nx
 import random
 import math
 
+def realizar_voraz(grafo):
+    colores_disponibles = ["red", "blue", "green", "yellow", "orange", "purple", "cyan", "magenta", "lime"]
+    solucion = {}
+
+    for nodo, vecinos in grafo.items():
+        # Buscamos qué colores tienen ya los vecinos coloreados
+        colores_vecinos = {solucion[str(v)] for v in vecinos if str(v) in solucion}
+        
+        # Asignamos el primer color que no esté pillado 
+        for color in colores_disponibles:
+            if color not in colores_vecinos:
+                solucion[nodo] = color
+                break
+    return solucion
+
+if __name__ == "__main__":
+    n = 100 # Puedes subir este número para ver grafos más grandes
+    mapa = generar_mapa_grafo(n)
+    
+    # Ejecutamos el algoritmo en Python
+    solucion = realizar_voraz(mapa["grafo"])
+
+    if solucion:
+        print("Solución encontrada con Python")
+        dibujar_mapa_coloreado(mapa, solucion)
+        # Guardamos en la carpeta de soluciones [cite: 24]
+        with open(f'sols/solucion_py_{n}.json', 'w') as f:
+            json.dump(solucion, f)
+    else:
+        print("No se encontró solución.")
 
 def generar_mapa_grafo(n):
     # Calcular dimensiones óptimas de la cuadrícula

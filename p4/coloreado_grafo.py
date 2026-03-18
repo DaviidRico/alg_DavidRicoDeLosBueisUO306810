@@ -1,6 +1,6 @@
 import json
 
-from auxiliar import dibujar_mapa_coloreado, generar_mapa_grafo
+from auxiliar import dibujar_mapa_coloreado, generar_mapa_grafo, realizar_voraz
 
 
 if __name__ == "__main__":
