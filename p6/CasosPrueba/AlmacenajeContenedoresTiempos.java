@@ -25,7 +25,7 @@ public static void main (String arg [])
 		for (int repeticiones=1; repeticiones<=nVeces;repeticiones++)
 		{ 
 
-			AlmacenajeContenedores solver = new AlmacenajeContenedores();
+			AlmacenajeContenedoresRyP solver = new AlmacenajeContenedoresRyP();
 			try {
 				solver.load(fichero);
 				solver.solve();
