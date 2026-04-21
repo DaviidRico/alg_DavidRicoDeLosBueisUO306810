@@ -1,4 +1,4 @@
-package p6;
+
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -6,14 +6,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AlmacenajeContenedores {
+public class AlmacenajeContenedoresRyP {
 
     private int capacidadC; 
     private int[] conjuntoS; 
-    private int mejorK = Integer.MAX_VALUE;
+    private int mejorK = Integer.MAX_VALUE; 
     private List<List<Integer>> mejorDistribucion = new ArrayList<>();
 
-    // Lee el fichero de entrada
     public void load(String filename) throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(filename));
         capacidadC = Integer.parseInt(br.readLine().trim());
@@ -25,55 +24,88 @@ public class AlmacenajeContenedores {
         br.close();
     }
 
-    // Inicia el algoritmo 
     public void solve() {
         List<List<Integer>> contenedores = new ArrayList<>();
-        List<Integer> currentBinSums = new ArrayList<>(); 
-        backtrack(0, contenedores, currentBinSums);
+        List<Integer> currentBinSums = new ArrayList<>();
+        backtrack(0, contenedores, currentBinSums, sumatorio());
     }
 
-    // Algoritmo Backtracking con poda
-    private void backtrack(int indexObject, List<List<Integer>> contenedores, List<Integer> currentBinSums) {
-        // Poda: Si ya hemos igualado o superado el número de contenedores de la mejor solución, descartamos esta rama
-        if (contenedores.size() >= mejorK) {
+    private int sumatorio() {
+        int suma = 0;
+        for(int i = 0; i < conjuntoS.length ; i++) {
+            suma += conjuntoS[i];
+        }
+        return suma;
+    }
+
+    private int calcularK() {
+        int k = 0;
+        int pareja = 0;
+        for(int i = 0; i < conjuntoS.length-2 ; i=+2 ) {
+            pareja = 0;
+            pareja = conjuntoS[i] + conjuntoS[i+1];
+            if(pareja % conjuntoS.length > 0) {
+                k ++;
+            }
+            k += pareja + conjuntoS.length;
+        }
+        if(conjuntoS.length % 2 == 0) {
+            int parejaUlt = conjuntoS[conjuntoS.length-2] + conjuntoS[conjuntoS.length-1];
+            if(parejaUlt % conjuntoS.length > 0) {
+                k ++;
+            }
+        }else{
+            int parejaUlt = conjuntoS[conjuntoS.length-1];
+            if(parejaUlt % conjuntoS.length > 0) {
+                k ++;
+            }
+        }
+        k += pareja + conjuntoS.length;
+        return k;
+    }
+
+    private void backtrack(int indexObject, List<List<Integer>> contenedores, List<Integer> currentBinSums, int sumaRestante) {
+        
+        int lowerBound = (sumaRestante +  conjuntoS.length - 1) / conjuntoS.length;
+        
+        if(contenedores.size() + lowerBound >= mejorK) {
+            return;
+        }
+        
+        if (contenedores.size()>= mejorK) {
             return;
         }
 
-        // Caso base: Todos los objetos han sido asignados a contenedores
         if (indexObject == conjuntoS.length) {
             mejorK = contenedores.size();
             mejorDistribucion = new ArrayList<>();
-            for (List<Integer> cont : contenedores) {
-                mejorDistribucion.add(new ArrayList<>(cont));
+            for (List<Integer> bin : contenedores) {
+                mejorDistribucion.add(new ArrayList<>(bin));
             }
             return;
         }
 
         int obj = conjuntoS[indexObject];
 
-        // Opción 1: Intentar meter el objeto en un contenedor ya existente
         for (int i = 0; i < contenedores.size(); i++) {
-            if (currentBinSums.get(i) + obj <= capacidadC) { // miramos capacidad
+            if (currentBinSums.get(i) + obj <= capacidadC) { 
                 contenedores.get(i).add(obj);
                 currentBinSums.set(i, currentBinSums.get(i) + obj);
 
-                backtrack(indexObject + 1, contenedores, currentBinSums); 
+                backtrack(indexObject + 1, contenedores, currentBinSums, sumaRestante - conjuntoS[indexObject]); 
 
-                // borramos
                 contenedores.get(i).remove(contenedores.get(i).size() - 1);
                 currentBinSums.set(i, currentBinSums.get(i) - obj);
             }
         }
 
-        // Opción 2: Meter el objeto en un contenedor nuevo
         List<Integer> nuevoContenedor = new ArrayList<>();
         nuevoContenedor.add(obj);
         contenedores.add(nuevoContenedor);
         currentBinSums.add(obj);
 
-        backtrack(indexObject + 1, contenedores, currentBinSums); 
+        backtrack(indexObject + 1, contenedores, currentBinSums, sumaRestante - conjuntoS[indexObject]); 
 
-        // Borramos
         contenedores.remove(contenedores.size() - 1);
         currentBinSums.remove(currentBinSums.size() - 1);
     }
@@ -96,7 +128,7 @@ public class AlmacenajeContenedores {
             return;
         }
         
-        AlmacenajeContenedores solver = new AlmacenajeContenedores();
+        AlmacenajeContenedoresRyP solver = new AlmacenajeContenedoresRyP();
         try {
             solver.load(args[0]);
             solver.solve();
